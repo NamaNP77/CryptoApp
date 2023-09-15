@@ -20,10 +20,16 @@ class HomeViewModel : ObservableObject {
     
     @Published var searchText : String = ""
     
+    @Published var sortOption : SortOption = .holdings
+    
     private let coinDataService = CoinDataService()
     private let marketDataService = MarketDataService()
     private let portfolioDataService = PortfolioDataService()
     private var cancellables = Set<AnyCancellable>()
+    
+    enum SortOption {
+        case rank , rankReversed , holdings, holdingsReversed , price , priceReversed
+    }
     
     init() {
         addSubcriber()
@@ -43,27 +49,30 @@ class HomeViewModel : ObservableObject {
         
         //update all coins
         $searchText
-            .combineLatest(coinDataService.$allCoins)
+            .combineLatest(coinDataService.$allCoins , $sortOption)
             .debounce(for: .seconds(0.5) , scheduler: DispatchQueue.main) // slight delay after receiving new value in textfield
-            .map { (text , startingCoins) -> [CoinModel] in
-                
-                guard !text.isEmpty
-                    else{
-                        return startingCoins    }
-                
-                let lowercasedText = text.lowercased()
-                return startingCoins.filter { (coin) -> Bool in
-                    return coin.name.lowercased().contains(lowercasedText) ||
-                    coin.symbol.lowercased().contains(lowercasedText) ||
-                    coin.id.lowercased().contains(lowercasedText)
-                }
-                
-            }
+            .map(filterAndSortCoins)
             .sink { [weak self] returnedCoins in
                 self?.allCoins = returnedCoins
             }
             .store(in: &cancellables)
         
+        //update portfolioCoins
+        $allCoins
+            .combineLatest(portfolioDataService.$savedEntities)
+            .map { (coinModels , portfolioEntities) -> [CoinModel] in
+                
+                coinModels
+                    .compactMap { coin -> CoinModel? in
+                        guard let entity = portfolioEntities.first(where: { $0.coinID == coin.id}) else {return nil}
+                        return coin.updateHoldings(amount: entity.amount)
+                    }
+            }
+            .sink { [weak self] returnedCoins in
+                guard let self = self else {return}
+                self.portfolioCoins = self.sortPortfolioCoinsIfNeeded(coins: returnedCoins)
+            }
+            .store(in: &cancellables)
         
         //update market data
         marketDataService.$marketData
@@ -116,23 +125,68 @@ class HomeViewModel : ObservableObject {
             }
             .store(in: &cancellables)
         
-        //update portfolioCoins
-        $allCoins
-            .combineLatest(portfolioDataService.$savedEntities)
-            .map { (coinModels , portfolioEntities) -> [CoinModel] in
-                
-                coinModels
-                    .compactMap { coin -> CoinModel? in
-                        guard let entity = portfolioEntities.first(where: { $0.coinID == coin.id}) else {return nil}
-                        return coin.updateHoldings(amount: entity.amount)
-                    }
-            }
-            .sink { [weak self] returnedCoins in
-                self?.portfolioCoins = returnedCoins
-            }
-            .store(in: &cancellables)
+        
     }
     
+    //MARK: - Private Functions
+    private func filterAndSortCoins(text : String , coin : [CoinModel] , sort : SortOption) -> [CoinModel]{
+        var updatedCoins = filterCoins(text: text, coin: coin)
+        sortCoins(sort: sort, coins: &updatedCoins)
+        
+        return updatedCoins
+    }
+    
+    private func filterCoins(text : String , coin : [CoinModel]) -> [CoinModel] {
+        
+        guard !text.isEmpty
+            else{
+                return coin    }
+        
+        let lowercasedText = text.lowercased()
+        return coin.filter { (coin) -> Bool in
+            return coin.name.lowercased().contains(lowercasedText) ||
+            coin.symbol.lowercased().contains(lowercasedText) ||
+            coin.id.lowercased().contains(lowercasedText)
+        }
+
+    }
+    
+    private func sortCoins(sort : SortOption , coins : inout [CoinModel]) {
+        
+        switch sort{
+        case .rank , .holdings:
+            //NOOB
+//            return coins.sorted { coin1, coin2 in
+//                return coin1.rank < coin2.rank
+//            }
+            //PRO
+             coins.sort(by: { $0.rank < $1.rank})
+        case .rankReversed , .holdingsReversed:
+             coins.sort(by: { $0.rank > $1.rank})
+            
+        case .price:
+             coins.sort(by: { $0.currentPrice > $1.currentPrice})
+            
+        case .priceReversed:
+             coins.sort(by: { $0.currentPrice < $1.currentPrice})
+        }
+    }
+    
+    private func sortPortfolioCoinsIfNeeded(coins : [CoinModel]) -> [CoinModel] {
+        // will only sort by holdings or reverseHoldings if needed
+        switch sortOption {
+        case .holdings:
+            return coins.sorted(by: {$0.currentHoldingsValue > $1.currentHoldingsValue})
+            
+        case.holdingsReversed:
+            return coins.sorted(by: {$0.currentHoldingsValue < $1.currentHoldingsValue})
+        default:
+            return coins
+        }
+    }
+    
+    
+    //MARK: - Public Functions
     func updatePortfolio(coin: CoinModel, amount: Double){
         portfolioDataService.updatePortfolio(coin: coin, amount: amount)
     }
