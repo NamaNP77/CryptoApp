@@ -39,6 +39,7 @@
 		EDEDA8522AABBD7E000E664D /* StatisticModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDEDA8512AABBD7E000E664D /* StatisticModel.swift */; };
 		EDEDA8542AABBEFC000E664D /* StatisticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDEDA8532AABBEFC000E664D /* StatisticView.swift */; };
 		EDEDA8562AABC2AD000E664D /* HomeStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDEDA8552AABC2AD000E664D /* HomeStatsView.swift */; };
+		EDF768182AB508F700A92E37 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF768172AB508F700A92E37 /* DetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +76,7 @@
 		EDEDA8512AABBD7E000E664D /* StatisticModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticModel.swift; sourceTree = "<group>"; };
 		EDEDA8532AABBEFC000E664D /* StatisticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticView.swift; sourceTree = "<group>"; };
 		EDEDA8552AABC2AD000E664D /* HomeStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeStatsView.swift; sourceTree = "<group>"; };
+		EDF768172AB508F700A92E37 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +146,7 @@
 			children = (
 				EDEB966A2AA51EA400415017 /* Components */,
 				EDEB96642AA51A8700415017 /* Home */,
+				EDF768142AB5088600A92E37 /* Detail */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -239,6 +242,30 @@
 			path = CoinImage;
 			sourceTree = "<group>";
 		};
+		EDF768142AB5088600A92E37 /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				EDF768162AB508DD00A92E37 /* ViewModels */,
+				EDF768152AB508D000A92E37 /* Views */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
+		EDF768152AB508D000A92E37 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				EDF768172AB508F700A92E37 /* DetailView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		EDF768162AB508DD00A92E37 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -325,6 +352,7 @@
 				EDEDA8502AABA8E1000E664D /* UIApplication.swift in Sources */,
 				EDEB966D2AA51EEC00415017 /* CircleButtonView.swift in Sources */,
 				EDEB96612AA5178500415017 /* Color.swift in Sources */,
+				EDF768182AB508F700A92E37 /* DetailView.swift in Sources */,
 				ED38CCAB2AB235CC0050677E /* HapticManager.swift in Sources */,
 				EDEB968E2AA8ED4A00415017 /* SearchBarView.swift in Sources */,
 				EDEB96812AA7B10900415017 /* NetworkingManager.swift in Sources */,
